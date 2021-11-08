@@ -1,13 +1,14 @@
 use std::io;
 #[cfg(target_os = "linux")]
 use std::os::unix::process::ExitStatusExt;
+use std::path::Path;
 use std::process::{Command, ExitStatus};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use std::path::Path;
 mod lib;
 
+#[cfg(target_os = "windows")]
 const STATUS_ACCESS_VIOLATION: u32 = 0xC0000005;
 const BATCH_SIZE: usize = 100;
 const NUM_THREADS: usize = 3;
@@ -15,23 +16,23 @@ const NUM_THREADS: usize = 3;
 #[derive(Default)]
 struct Statistics {
     fuzz_cases: AtomicUsize,
-    num_crashes: AtomicUsize
+    num_crashes: AtomicUsize,
 }
 
 fn fuzz(thr_id: usize, filename: &str, inp: &Vec<u8>) -> io::Result<ExitStatus> {
     // Write out the input to a temporary file
     let filepath = format!("./output/tmp_{}_{}", thr_id, &filename);
     std::fs::write(&filepath, inp).unwrap();
-    let runner = Command::new("./bin/exif_win32.exe").arg(&filepath).output()?;
+    let runner = Command::new("./bin/exif_win32.exe")
+        .arg(&filepath)
+        .output()?;
 
     Ok(runner.status)
 }
 
 fn worker(thr_id: usize, filename: &str, stats: Arc<Statistics>) -> io::Result<()> {
-
     loop {
         for _ in 0..BATCH_SIZE {
-
             let input = std::fs::read(filename).unwrap();
             let mut mutator = lib::Mutator::new(
                 input,
@@ -40,14 +41,17 @@ fn worker(thr_id: usize, filename: &str, stats: Arc<Statistics>) -> io::Result<(
             mutator.bitflip(0.01);
             let exit = fuzz(thr_id, filename, &mutator.input).unwrap();
             #[cfg(target_os = "windows")]
-            if exit.code().unwrap() as u32 == STATUS_ACCESS_VIOLATION{
+            if exit.code().unwrap() as u32 == STATUS_ACCESS_VIOLATION {
                 std::fs::write(
-                    format!("./output/crash_{}_{}", stats.num_crashes.load(Ordering::SeqCst), filename),
+                    format!(
+                        "./output/crash_{}_{}",
+                        stats.num_crashes.load(Ordering::SeqCst),
+                        filename
+                    ),
                     mutator.input,
                 )
                 .unwrap();
                 stats.num_crashes.fetch_add(1, Ordering::SeqCst);
-
             }
             #[cfg(target_os = "linux")]
             if exit.signal() == Some(11) {
