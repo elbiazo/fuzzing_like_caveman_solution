@@ -11,7 +11,7 @@ mod lib;
 #[cfg(target_os = "windows")]
 const STATUS_ACCESS_VIOLATION: u32 = 0xC0000005;
 const BATCH_SIZE: usize = 100;
-const NUM_THREADS: usize = 3;
+const NUM_THREADS: usize = 10;
 
 #[derive(Default)]
 struct Statistics {
@@ -23,7 +23,7 @@ fn fuzz(thr_id: usize, filename: &str, inp: &Vec<u8>) -> io::Result<ExitStatus> 
     // Write out the input to a temporary file
     let filepath = format!("./output/tmp_{}_{}", thr_id, &filename);
     std::fs::write(&filepath, inp).expect("output dir does not exist");
-    let runner = Command::new("./bin/exif_mac")
+    let runner = Command::new("./bin/exif")
         .arg(&filepath)
         .output()?;
 

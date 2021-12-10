@@ -1,8 +1,11 @@
-[package]
-name = "rfuzz"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+members = [
+    "rfuzz",
+]
 
-[dependencies]
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+debug = true
