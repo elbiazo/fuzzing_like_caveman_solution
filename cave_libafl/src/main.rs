@@ -25,8 +25,8 @@ fn main() {
     let corpus_dirs = vec![PathBuf::from("./corpus")];
     let input_corpus = InMemoryCorpus::<BytesInput>::new();
 
-    // let crash_corpus = OnDiskCorpus::new(PathBuf::from("./crashes"))
-        // .expect("Could not create timeouts corpus");
+    let crash_corpus = OnDiskCorpus::new(PathBuf::from("./crashes"))
+        .expect("Could not create timeouts corpus");
 
 
 
@@ -58,7 +58,7 @@ fn main() {
     let mut state = StdState::new(
         StdRand::with_seed(current_nanos()),
         input_corpus,
-        OnDiskCorpus::new(PathBuf::from("./crashes")).expect("Could not create crashes corpus"),
+        crash_corpus,
         tuple_list!(feedback_state, objective_state),
     );
 
