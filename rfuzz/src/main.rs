@@ -23,9 +23,7 @@ fn fuzz(thr_id: usize, filename: &str, inp: &Vec<u8>) -> io::Result<ExitStatus> 
     // Write out the input to a temporary file
     let filepath = format!("./output/tmp_{}_{}", thr_id, &filename);
     std::fs::write(&filepath, inp).expect("output dir does not exist");
-    let runner = Command::new("./bin/exif")
-        .arg(&filepath)
-        .output()?;
+    let runner = Command::new("./bin/exif").arg(&filepath).output()?;
 
     Ok(runner.status)
 }

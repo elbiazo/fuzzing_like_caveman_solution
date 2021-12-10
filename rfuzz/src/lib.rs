@@ -45,9 +45,7 @@ impl Mutator {
     pub fn new(input: Vec<u8>, seed: u64) -> Self {
         Mutator {
             input: input,
-            rng: Rng {
-                seed: seed,
-            },
+            rng: Rng { seed: seed },
         }
     }
 
