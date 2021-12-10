@@ -22,8 +22,8 @@ struct Statistics {
 fn fuzz(thr_id: usize, filename: &str, inp: &Vec<u8>) -> io::Result<ExitStatus> {
     // Write out the input to a temporary file
     let filepath = format!("./output/tmp_{}_{}", thr_id, &filename);
-    std::fs::write(&filepath, inp).unwrap();
-    let runner = Command::new("./bin/exif_win32.exe")
+    std::fs::write(&filepath, inp).expect("output dir does not exist");
+    let runner = Command::new("./bin/exif_mac")
         .arg(&filepath)
         .output()?;
 
@@ -39,7 +39,7 @@ fn worker(thr_id: usize, filename: &str, stats: Arc<Statistics>) -> io::Result<(
                 0x2839839283234 ^ unsafe { std::arch::x86_64::_rdtsc() },
             );
             mutator.bitflip(0.01);
-            let exit = fuzz(thr_id, filename, &mutator.input).unwrap();
+            let exit = fuzz(thr_id, filename, &mutator.input)?;
             #[cfg(target_os = "windows")]
             if exit.code().unwrap() as u32 == STATUS_ACCESS_VIOLATION {
                 std::fs::write(
