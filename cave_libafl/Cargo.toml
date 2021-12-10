@@ -1,0 +1,15 @@
+[package]
+name = "cave_libafl"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libafl = "0.6.1"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+debug = true

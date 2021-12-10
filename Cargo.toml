@@ -2,6 +2,7 @@
 
 members = [
     "rfuzz",
+    "cave_libafl",
 ]
 
 [profile.release]
